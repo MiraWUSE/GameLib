@@ -1,6 +1,5 @@
-package com.example.gamelib.ui.theme
+package com.example.gamelib.presentation.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

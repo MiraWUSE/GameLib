@@ -1,4 +1,4 @@
-package com.example.gamelib.ui.theme
+package com.example.gamelib.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
