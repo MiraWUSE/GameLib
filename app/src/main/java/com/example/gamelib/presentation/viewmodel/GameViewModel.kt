@@ -7,11 +7,14 @@ import com.example.gamelib.domain.usecase.AddGameUseCase
 import com.example.gamelib.domain.usecase.DeleteGameUseCase
 import com.example.gamelib.domain.usecase.GetGamesUseCase
 import com.example.gamelib.domain.usecase.UpdateGameUseCase
+import com.example.gamelib.presentation.state.GameUiEvent
 import com.example.gamelib.presentation.state.GameUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,12 +30,20 @@ class GameViewModel @Inject constructor(
 
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
+
+    private val _events = Channel<GameUiEvent>()
+
+    val events = _events.receiveAsFlow()
+
+
     init {
         observeGames()
     }
 
+
     private fun observeGames() {
         viewModelScope.launch {
+
             getGamesUseCase().collect { games ->
                 _uiState.value = _uiState.value.copy(
                     games = games
@@ -41,20 +52,30 @@ class GameViewModel @Inject constructor(
         }
     }
 
+
     fun addGame(game: Game) {
         viewModelScope.launch {
+
             addGameUseCase(game)
+
+            _events.send(GameUiEvent.DataSaved)
         }
     }
+
 
     fun updateGame(game: Game) {
         viewModelScope.launch {
+
             updateGameUseCase(game)
+
+            _events.send(GameUiEvent.DataSaved)
         }
     }
 
+
     fun deleteGame(game: Game) {
         viewModelScope.launch {
+
             deleteGameUseCase(game)
         }
     }

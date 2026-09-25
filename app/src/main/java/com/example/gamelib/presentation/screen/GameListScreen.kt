@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,18 +21,35 @@ import com.example.gamelib.presentation.viewmodel.GameViewModel
 
 @Composable
 fun GameListScreen(
-    viewModel: GameViewModel
+    viewModel: GameViewModel,
+    onAddClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(16.dp)
     ) {
-        items(uiState.games) { game ->
-            GameItem(game = game)
+
+        Button(
+            onClick = onAddClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Добавить игру")
+        }
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(uiState.games) { game ->
+                GameItem(
+                    game = game
+                )
+            }
         }
     }
 }
@@ -44,25 +62,32 @@ private fun GameItem(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+
             Text(
                 text = game.title,
                 style = MaterialTheme.typography.titleMedium
             )
 
             Text(
-                text = game.genre,
+                text = "Жанр: ${game.genre}",
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Text(
-                text = game.platform,
+                text = "Платформа: ${game.platform}",
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Text(
-                text = game.status.name,
+                text = "Разработчик: ${game.developer}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Text(
+                text = "Статус: ${game.status.name}",
                 style = MaterialTheme.typography.bodySmall
             )
         }
