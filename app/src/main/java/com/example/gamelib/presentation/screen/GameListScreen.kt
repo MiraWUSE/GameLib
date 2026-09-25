@@ -2,6 +2,7 @@ package com.example.gamelib.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -46,11 +47,15 @@ fun GameListScreen(
                 .padding(top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
             items(uiState.games) { game ->
 
                 GameItem(
                     game = game,
-                    onEditClick = onEditClick
+                    onEditClick = onEditClick,
+                    onDeleteClick = {
+                        viewModel.deleteGame(game)
+                    }
                 )
             }
         }
@@ -60,7 +65,8 @@ fun GameListScreen(
 @Composable
 private fun GameItem(
     game: Game,
-    onEditClick: (Game) -> Unit
+    onEditClick: (Game) -> Unit,
+    onDeleteClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -68,7 +74,7 @@ private fun GameItem(
 
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
             Text(
@@ -96,13 +102,26 @@ private fun GameItem(
                 style = MaterialTheme.typography.bodySmall
             )
 
-            Button(
-                onClick = {
-                    onEditClick(game)
-                },
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Редактировать")
+
+                Button(
+                    onClick = {
+                        onEditClick(game)
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Редактировать")
+                }
+
+                Button(
+                    onClick = onDeleteClick,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Удалить")
+                }
             }
         }
     }
