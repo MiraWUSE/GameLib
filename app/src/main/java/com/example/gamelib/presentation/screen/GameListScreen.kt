@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.gamelib.domain.model.Game
 import com.example.gamelib.presentation.viewmodel.GameViewModel
+import com.example.gamelib.presentation.util.toDisplayName
 
 @Composable
 fun GameListScreen(
@@ -98,7 +99,7 @@ private fun GameItem(
             )
 
             Text(
-                text = "Статус: ${game.status.name}",
+                text = "Статус: ${game.status.toDisplayName()}",
                 style = MaterialTheme.typography.bodySmall
             )
 

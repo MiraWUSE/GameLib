@@ -1,13 +1,16 @@
 package com.example.gamelib.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.gamelib.domain.model.Game
 import com.example.gamelib.domain.model.GameStatus
+import com.example.gamelib.presentation.util.toDisplayName
 
 @Composable
 fun GameEditScreen(
@@ -41,6 +45,16 @@ fun GameEditScreen(
 
     var developer by remember(game) {
         mutableStateOf(game?.developer ?: "")
+    }
+
+    var status by remember(game) {
+        mutableStateOf(
+            game?.status ?: GameStatus.WANT_TO_PLAY
+        )
+    }
+
+    var statusMenuExpanded by remember {
+        mutableStateOf(false)
     }
 
     Column(
@@ -103,8 +117,46 @@ fun GameEditScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            Button(
+                onClick = {
+                    statusMenuExpanded = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Статус: ${status.toDisplayName()}"
+                )
+            }
+
+            DropdownMenu(
+                expanded = statusMenuExpanded,
+                onDismissRequest = {
+                    statusMenuExpanded = false
+                }
+            ) {
+
+                GameStatus.entries.forEach { gameStatus ->
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(gameStatus.toDisplayName())
+                        },
+                        onClick = {
+                            status = gameStatus
+                            statusMenuExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+
         Button(
             onClick = {
+
                 val savedGame = Game(
                     id = game?.id ?: 0,
                     title = title,
@@ -112,7 +164,7 @@ fun GameEditScreen(
                     genre = genre,
                     platform = platform,
                     developer = developer,
-                    status = game?.status ?: GameStatus.WANT_TO_PLAY
+                    status = status
                 )
 
                 onSaveClick(savedGame)
