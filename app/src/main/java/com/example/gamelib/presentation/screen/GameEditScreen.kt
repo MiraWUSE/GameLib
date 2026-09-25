@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +57,16 @@ fun GameEditScreen(
         mutableStateOf(false)
     }
 
+    var showErrors by remember(game) {
+        mutableStateOf(false)
+    }
+
+    val titleError = showErrors && title.isBlank()
+    val descriptionError = showErrors && description.isBlank()
+    val genreError = showErrors && genre.isBlank()
+    val platformError = showErrors && platform.isBlank()
+    val developerError = showErrors && developer.isBlank()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -74,45 +84,85 @@ fun GameEditScreen(
 
         OutlinedTextField(
             value = title,
-            onValueChange = { title = it },
+            onValueChange = {
+                title = it
+            },
             label = {
                 Text("Название")
+            },
+            isError = titleError,
+            supportingText = {
+                if (titleError) {
+                    Text("Обязательное поле")
+                }
             },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = description,
-            onValueChange = { description = it },
+            onValueChange = {
+                description = it
+            },
             label = {
                 Text("Описание")
+            },
+            isError = descriptionError,
+            supportingText = {
+                if (descriptionError) {
+                    Text("Обязательное поле")
+                }
             },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = genre,
-            onValueChange = { genre = it },
+            onValueChange = {
+                genre = it
+            },
             label = {
                 Text("Жанр")
+            },
+            isError = genreError,
+            supportingText = {
+                if (genreError) {
+                    Text("Обязательное поле")
+                }
             },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = platform,
-            onValueChange = { platform = it },
+            onValueChange = {
+                platform = it
+            },
             label = {
                 Text("Платформа")
+            },
+            isError = platformError,
+            supportingText = {
+                if (platformError) {
+                    Text("Обязательное поле")
+                }
             },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = developer,
-            onValueChange = { developer = it },
+            onValueChange = {
+                developer = it
+            },
             label = {
                 Text("Разработчик")
+            },
+            isError = developerError,
+            supportingText = {
+                if (developerError) {
+                    Text("Обязательное поле")
+                }
             },
             modifier = Modifier.fillMaxWidth()
         )
@@ -143,7 +193,9 @@ fun GameEditScreen(
 
                     DropdownMenuItem(
                         text = {
-                            Text(gameStatus.toDisplayName())
+                            Text(
+                                gameStatus.toDisplayName()
+                            )
                         },
                         onClick = {
                             status = gameStatus
@@ -157,17 +209,29 @@ fun GameEditScreen(
         Button(
             onClick = {
 
-                val savedGame = Game(
-                    id = game?.id ?: 0,
-                    title = title,
-                    description = description,
-                    genre = genre,
-                    platform = platform,
-                    developer = developer,
-                    status = status
-                )
+                showErrors = true
 
-                onSaveClick(savedGame)
+                val isValid =
+                    title.isNotBlank() &&
+                            description.isNotBlank() &&
+                            genre.isNotBlank() &&
+                            platform.isNotBlank() &&
+                            developer.isNotBlank()
+
+                if (isValid) {
+
+                    val savedGame = Game(
+                        id = game?.id ?: 0,
+                        title = title.trim(),
+                        description = description.trim(),
+                        genre = genre.trim(),
+                        platform = platform.trim(),
+                        developer = developer.trim(),
+                        status = status
+                    )
+
+                    onSaveClick(savedGame)
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
