@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.gamelib.domain.model.Game
 import com.example.gamelib.presentation.screen.GameEditScreen
 import com.example.gamelib.presentation.screen.GameListScreen
 import com.example.gamelib.presentation.state.GameUiEvent
@@ -36,6 +37,10 @@ class MainActivity : ComponentActivity() {
 
                 var showEditScreen by remember {
                     mutableStateOf(false)
+                }
+
+                var selectedGame by remember {
+                    mutableStateOf<Game?>(null)
                 }
 
                 val snackbarHostState = remember {
@@ -72,11 +77,17 @@ class MainActivity : ComponentActivity() {
                         if (showEditScreen) {
 
                             GameEditScreen(
+                                game = selectedGame,
                                 onSaveClick = { game ->
 
-                                    viewModel.addGame(game)
+                                    if (selectedGame == null) {
+                                        viewModel.addGame(game)
+                                    } else {
+                                        viewModel.updateGame(game)
+                                    }
 
                                     showEditScreen = false
+                                    selectedGame = null
                                 }
                             )
 
@@ -84,7 +95,14 @@ class MainActivity : ComponentActivity() {
 
                             GameListScreen(
                                 viewModel = viewModel,
+
                                 onAddClick = {
+                                    selectedGame = null
+                                    showEditScreen = true
+                                },
+
+                                onEditClick = { game ->
+                                    selectedGame = game
                                     showEditScreen = true
                                 }
                             )

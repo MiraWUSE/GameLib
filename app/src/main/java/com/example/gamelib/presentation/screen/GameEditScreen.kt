@@ -20,13 +20,28 @@ import com.example.gamelib.domain.model.GameStatus
 
 @Composable
 fun GameEditScreen(
+    game: Game? = null,
     onSaveClick: (Game) -> Unit
 ) {
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var genre by remember { mutableStateOf("") }
-    var platform by remember { mutableStateOf("") }
-    var developer by remember { mutableStateOf("") }
+    var title by remember(game) {
+        mutableStateOf(game?.title ?: "")
+    }
+
+    var description by remember(game) {
+        mutableStateOf(game?.description ?: "")
+    }
+
+    var genre by remember(game) {
+        mutableStateOf(game?.genre ?: "")
+    }
+
+    var platform by remember(game) {
+        mutableStateOf(game?.platform ?: "")
+    }
+
+    var developer by remember(game) {
+        mutableStateOf(game?.developer ?: "")
+    }
 
     Column(
         modifier = Modifier
@@ -36,7 +51,11 @@ fun GameEditScreen(
     ) {
 
         Text(
-            text = "Добавление игры"
+            text = if (game == null) {
+                "Добавление игры"
+            } else {
+                "Редактирование игры"
+            }
         )
 
         OutlinedTextField(
@@ -86,16 +105,17 @@ fun GameEditScreen(
 
         Button(
             onClick = {
-                val game = Game(
+                val savedGame = Game(
+                    id = game?.id ?: 0,
                     title = title,
                     description = description,
                     genre = genre,
                     platform = platform,
                     developer = developer,
-                    status = GameStatus.WANT_TO_PLAY
+                    status = game?.status ?: GameStatus.WANT_TO_PLAY
                 )
 
-                onSaveClick(game)
+                onSaveClick(savedGame)
             },
             modifier = Modifier.fillMaxWidth()
         ) {

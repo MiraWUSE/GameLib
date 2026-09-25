@@ -22,7 +22,8 @@ import com.example.gamelib.presentation.viewmodel.GameViewModel
 @Composable
 fun GameListScreen(
     viewModel: GameViewModel,
-    onAddClick: () -> Unit
+    onAddClick: () -> Unit,
+    onEditClick: (Game) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -46,8 +47,10 @@ fun GameListScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(uiState.games) { game ->
+
                 GameItem(
-                    game = game
+                    game = game,
+                    onEditClick = onEditClick
                 )
             }
         }
@@ -56,11 +59,13 @@ fun GameListScreen(
 
 @Composable
 private fun GameItem(
-    game: Game
+    game: Game,
+    onEditClick: (Game) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
+
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -90,6 +95,15 @@ private fun GameItem(
                 text = "Статус: ${game.status.name}",
                 style = MaterialTheme.typography.bodySmall
             )
+
+            Button(
+                onClick = {
+                    onEditClick(game)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Редактировать")
+            }
         }
     }
 }
