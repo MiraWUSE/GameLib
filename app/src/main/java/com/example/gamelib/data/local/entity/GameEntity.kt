@@ -7,6 +7,7 @@ import androidx.room3.PrimaryKey
 data class GameEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val remoteId: Int? = null,
     val title: String,
     val description: String,
     val genre: String,
