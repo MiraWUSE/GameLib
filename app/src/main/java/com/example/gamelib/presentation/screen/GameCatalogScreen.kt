@@ -2,7 +2,6 @@ package com.example.gamelib.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,9 +9,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -22,13 +23,17 @@ import com.example.gamelib.presentation.util.toDisplayName
 import com.example.gamelib.presentation.viewmodel.GameViewModel
 
 @Composable
-fun GameListScreen(
+fun GameCatalogScreen(
     viewModel: GameViewModel,
-    onAddClick: () -> Unit,
-    onEditClick: (Game) -> Unit,
-    onCatalogClick: () -> Unit
+    onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        if (uiState.catalogGames.isEmpty()) {
+            viewModel.loadCatalogGames()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -37,46 +42,61 @@ fun GameListScreen(
     ) {
 
         Button(
-            onClick = onCatalogClick,
+            onClick = onBackClick,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Каталог игр")
+            Text("Мои игры")
         }
 
-        Button(
-            onClick = onAddClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp)
-        ) {
-            Text("Добавить игру")
-        }
+        when {
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(uiState.games) { game ->
+            uiState.isCatalogLoading -> {
 
-                GameItem(
-                    game = game,
-                    onEditClick = onEditClick,
-                    onDeleteClick = {
-                        viewModel.deleteGame(game)
-                    }
+                CircularProgressIndicator(
+                    modifier = Modifier.padding(16.dp)
                 )
+            }
+
+            uiState.catalogErrorMessage != null -> {
+
+                Text(
+                    text = uiState.catalogErrorMessage ?: "",
+                    modifier = Modifier.padding(16.dp)
+                )
+
+                Button(
+                    onClick = {
+                        viewModel.loadCatalogGames()
+                    }
+                ) {
+                    Text("Повторить")
+                }
+            }
+
+            else -> {
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+
+                    items(uiState.catalogGames) { game ->
+
+                        CatalogGameItem(
+                            game = game
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun GameItem(
-    game: Game,
-    onEditClick: (Game) -> Unit,
-    onDeleteClick: () -> Unit
+private fun CatalogGameItem(
+    game: Game
 ) {
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -84,12 +104,17 @@ private fun GameItem(
 
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
 
             Text(
                 text = game.title,
                 style = MaterialTheme.typography.titleMedium
+            )
+
+            Text(
+                text = game.description,
+                style = MaterialTheme.typography.bodyMedium
             )
 
             Text(
@@ -111,28 +136,6 @@ private fun GameItem(
                 text = "Статус: ${game.status.toDisplayName()}",
                 style = MaterialTheme.typography.bodySmall
             )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-
-                Button(
-                    onClick = {
-                        onEditClick(game)
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Редактировать")
-                }
-
-                Button(
-                    onClick = onDeleteClick,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Удалить")
-                }
-            }
         }
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.gamelib.domain.model.Game
+import com.example.gamelib.presentation.screen.GameCatalogScreen
 import com.example.gamelib.presentation.screen.GameEditScreen
 import com.example.gamelib.presentation.screen.GameListScreen
 import com.example.gamelib.presentation.state.GameUiEvent
@@ -36,6 +37,10 @@ class MainActivity : ComponentActivity() {
                 val viewModel: GameViewModel = hiltViewModel()
 
                 var showEditScreen by remember {
+                    mutableStateOf(false)
+                }
+
+                var showCatalogScreen by remember {
                     mutableStateOf(false)
                 }
 
@@ -74,38 +79,56 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(paddingValues)
                     ) {
 
-                        if (showEditScreen) {
+                        when {
 
-                            GameEditScreen(
-                                game = selectedGame,
-                                onSaveClick = { game ->
+                            showCatalogScreen -> {
 
-                                    if (selectedGame == null) {
-                                        viewModel.addGame(game)
-                                    } else {
-                                        viewModel.updateGame(game)
+                                GameCatalogScreen(
+                                    viewModel = viewModel,
+                                    onBackClick = {
+                                        showCatalogScreen = false
                                     }
+                                )
+                            }
 
-                                    showEditScreen = false
-                                    selectedGame = null
-                                }
-                            )
+                            showEditScreen -> {
 
-                        } else {
+                                GameEditScreen(
+                                    game = selectedGame,
+                                    onSaveClick = { game ->
 
-                            GameListScreen(
-                                viewModel = viewModel,
+                                        if (selectedGame == null) {
+                                            viewModel.addGame(game)
+                                        } else {
+                                            viewModel.updateGame(game)
+                                        }
 
-                                onAddClick = {
-                                    selectedGame = null
-                                    showEditScreen = true
-                                },
+                                        showEditScreen = false
+                                        selectedGame = null
+                                    }
+                                )
+                            }
 
-                                onEditClick = { game ->
-                                    selectedGame = game
-                                    showEditScreen = true
-                                }
-                            )
+                            else -> {
+
+                                GameListScreen(
+                                    viewModel = viewModel,
+
+                                    onAddClick = {
+                                        selectedGame = null
+                                        showEditScreen = true
+                                    },
+
+                                    onEditClick = { game ->
+                                        selectedGame = game
+                                        showEditScreen = true
+                                    },
+
+                                    onCatalogClick = {
+                                        showCatalogScreen = true
+                                    }
+                                )
+                            }
                         }
                     }
                 }
