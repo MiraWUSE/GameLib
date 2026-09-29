@@ -24,7 +24,9 @@ object DatabaseModule {
             context,
             GameDatabase::class.java,
             "game_database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration(true)
+            .build()
     }
 
     @Provides

@@ -30,20 +30,14 @@ class GameRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addGame(game: Game) {
-        gameDao.insertGame(
-            game.toEntity()
-        )
+        gameDao.insertGame(game.toEntity())
     }
 
     override suspend fun updateGame(game: Game) {
-        gameDao.updateGame(
-            game.toEntity()
-        )
+        gameDao.updateGame(game.toEntity())
     }
 
     override suspend fun deleteGame(game: Game) {
-        gameDao.deleteGame(
-            game.toEntity()
-        )
+        gameDao.deleteGame(game.toEntity())
     }
 }

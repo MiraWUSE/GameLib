@@ -7,7 +7,7 @@ import com.example.gamelib.data.local.entity.GameEntity
 
 @Database(
     entities = [GameEntity::class],
-    version = 1
+    version = 2
 )
 abstract class GameDatabase : RoomDatabase() {
 

@@ -62,7 +62,6 @@ class GameViewModel @Inject constructor(
             )
 
             try {
-
                 val games = getCatalogGamesUseCase()
 
                 _uiState.value = _uiState.value.copy(
