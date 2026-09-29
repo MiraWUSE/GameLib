@@ -4,6 +4,10 @@ import com.example.gamelib.domain.model.Game
 
 data class GameUiState(
     val games: List<Game> = emptyList(),
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null
+
+    val catalogGames: List<Game> = emptyList(),
+
+    val isCatalogLoading: Boolean = false,
+
+    val catalogErrorMessage: String? = null
 )

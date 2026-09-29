@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.gamelib.domain.model.Game
 import com.example.gamelib.domain.usecase.AddGameUseCase
 import com.example.gamelib.domain.usecase.DeleteGameUseCase
+import com.example.gamelib.domain.usecase.GetCatalogGamesUseCase
 import com.example.gamelib.domain.usecase.GetGamesUseCase
 import com.example.gamelib.domain.usecase.UpdateGameUseCase
 import com.example.gamelib.presentation.state.GameUiEvent
@@ -21,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class GameViewModel @Inject constructor(
     private val getGamesUseCase: GetGamesUseCase,
+    private val getCatalogGamesUseCase: GetCatalogGamesUseCase,
     private val addGameUseCase: AddGameUseCase,
     private val updateGameUseCase: UpdateGameUseCase,
     private val deleteGameUseCase: DeleteGameUseCase
@@ -28,23 +30,22 @@ class GameViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(GameUiState())
 
-    val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
-
+    val uiState: StateFlow<GameUiState> =
+        _uiState.asStateFlow()
 
     private val _events = Channel<GameUiEvent>()
 
     val events = _events.receiveAsFlow()
 
-
     init {
         observeGames()
     }
-
 
     private fun observeGames() {
         viewModelScope.launch {
 
             getGamesUseCase().collect { games ->
+
                 _uiState.value = _uiState.value.copy(
                     games = games
                 )
@@ -52,30 +53,57 @@ class GameViewModel @Inject constructor(
         }
     }
 
+    fun loadCatalogGames() {
+        viewModelScope.launch {
+
+            _uiState.value = _uiState.value.copy(
+                isCatalogLoading = true,
+                catalogErrorMessage = null
+            )
+
+            try {
+
+                val games = getCatalogGamesUseCase()
+
+                _uiState.value = _uiState.value.copy(
+                    catalogGames = games,
+                    isCatalogLoading = false
+                )
+
+            } catch (exception: Exception) {
+
+                _uiState.value = _uiState.value.copy(
+                    isCatalogLoading = false,
+                    catalogErrorMessage = "Не удалось загрузить игры"
+                )
+            }
+        }
+    }
 
     fun addGame(game: Game) {
         viewModelScope.launch {
 
             addGameUseCase(game)
 
-            _events.send(GameUiEvent.DataSaved)
+            _events.send(
+                GameUiEvent.DataSaved
+            )
         }
     }
-
 
     fun updateGame(game: Game) {
         viewModelScope.launch {
 
             updateGameUseCase(game)
 
-            _events.send(GameUiEvent.DataSaved)
+            _events.send(
+                GameUiEvent.DataSaved
+            )
         }
     }
 
-
     fun deleteGame(game: Game) {
         viewModelScope.launch {
-
             deleteGameUseCase(game)
         }
     }
