@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.util.Log
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
@@ -71,9 +72,16 @@ class GameViewModel @Inject constructor(
 
             } catch (exception: Exception) {
 
+                Log.e(
+                    "GameCatalog",
+                    "Ошибка загрузки каталога",
+                    exception
+                )
+
                 _uiState.value = _uiState.value.copy(
                     isCatalogLoading = false,
-                    catalogErrorMessage = "Не удалось загрузить игры"
+                    catalogErrorMessage =
+                        "${exception.javaClass.simpleName}: ${exception.message}"
                 )
             }
         }
