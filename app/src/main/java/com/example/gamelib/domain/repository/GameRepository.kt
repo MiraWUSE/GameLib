@@ -7,6 +7,8 @@ interface GameRepository {
 
     fun getAllGames(): Flow<List<Game>>
 
+    suspend fun getCatalogGames(): List<Game>
+
     suspend fun addGame(game: Game)
 
     suspend fun updateGame(game: Game)
