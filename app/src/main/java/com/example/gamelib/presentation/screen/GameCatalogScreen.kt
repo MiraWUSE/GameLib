@@ -85,7 +85,8 @@ fun GameCatalogScreen(
                     items(uiState.catalogGames) { game ->
 
                         CatalogGameItem(
-                            game = game
+                            game = game,
+                            onAddClick = { viewModel.addGame(game) }
                         )
                     }
                 }
@@ -96,7 +97,8 @@ fun GameCatalogScreen(
 
 @Composable
 private fun CatalogGameItem(
-    game: Game
+    game: Game,
+    onAddClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -136,6 +138,13 @@ private fun CatalogGameItem(
                 text = "Статус: ${game.status.toDisplayName()}",
                 style = MaterialTheme.typography.bodySmall
             )
+
+            Button(
+                onClick = onAddClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Добавить в библиотеку")
+            }
         }
     }
 }
