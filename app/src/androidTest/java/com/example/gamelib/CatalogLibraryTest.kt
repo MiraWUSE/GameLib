@@ -11,7 +11,6 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
-import androidx.room3.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.gamelib.data.local.database.GameDatabase
@@ -42,7 +41,7 @@ class CatalogLibraryTest {
     fun catalogGameCanBeSavedEditedAndReadAfterDatabaseReopen() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val databaseName = "catalog-test-${System.nanoTime()}"
-        var database = Room.databaseBuilder(context, GameDatabase::class.java, databaseName).build()
+        var database = GameDatabase.open(context, databaseName)
         val store = ViewModelStore()
         try {
             // Only the network is replaced: UI, use cases, repository and Room are real.
@@ -101,7 +100,7 @@ class CatalogLibraryTest {
 
             compose.runOnUiThread { store.clear() }
             database.close()
-            database = Room.databaseBuilder(context, GameDatabase::class.java, databaseName).build()
+            database = GameDatabase.open(context, databaseName)
             val persisted = runBlocking { GameRepositoryImpl(database.gameDao(), api).getAllGames().first().single() }
             assertEquals(saved.copy(status = GameStatus.PLAYING), persisted)
         } finally {

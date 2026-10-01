@@ -1,7 +1,6 @@
 package com.example.gamelib
 
 import android.database.sqlite.SQLiteDatabase
-import androidx.room3.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.gamelib.data.local.database.GameDatabase
@@ -14,7 +13,15 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GameDatabaseMigrationTest {
     @Test
-    fun versionTwoGamesSurviveAddingThumbnail() = runBlocking {
+    fun versionTwoGamesSurviveAddingThumbnail() = checkMigration(2, true)
+
+    @Test
+    fun versionOneGamesSurviveBothMigrations() = checkMigration(1, false)
+
+    @Test
+    fun earlyVersionOneWithRemoteIdAlsoPreservesGames() = checkMigration(1, true)
+
+    private fun checkMigration(version: Int, hasRemoteId: Boolean) = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val name = "migration-test-${System.nanoTime()}"
         val file = context.getDatabasePath(name)
@@ -22,19 +29,19 @@ class GameDatabaseMigrationTest {
         try {
             SQLiteDatabase.openOrCreateDatabase(file, null).use { old ->
                 old.execSQL("""CREATE TABLE games (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, remoteId INTEGER,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    ${if (hasRemoteId) "remoteId INTEGER," else ""}
                     title TEXT NOT NULL, description TEXT NOT NULL, genre TEXT NOT NULL,
                     platform TEXT NOT NULL, developer TEXT NOT NULL, status TEXT NOT NULL)
                 """)
-                old.execSQL("INSERT INTO games VALUES (1, 452, 'Existing game', 'Description', 'RPG', 'PC', 'Studio', 'PLAYING')")
-                old.version = 2
+                old.execSQL("INSERT INTO games VALUES (1, ${if (hasRemoteId) "452," else ""} 'Existing game', 'Description', 'RPG', 'PC', 'Studio', 'PLAYING')")
+                old.version = version
             }
-            val database = Room.databaseBuilder(context, GameDatabase::class.java, name)
-                .addMigrations(GameDatabase.MIGRATION_2_3).build()
+            val database = GameDatabase.open(context, name)
             try {
                 val game = database.gameDao().getAllGames().first().single()
                 assertEquals("Existing game", game.title)
-                assertEquals(452, game.remoteId)
+                assertEquals(if (hasRemoteId) 452 else null, game.remoteId)
                 assertEquals("PLAYING", game.status)
                 assertNull(game.thumbnail)
                 database.gameDao().updateGame(game.copy(thumbnail = "https://example.com/cover.jpg"))

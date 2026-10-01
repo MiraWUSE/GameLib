@@ -23,12 +23,19 @@ android {
     }
 
     buildTypes {
+        create("verification") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".verification"
+            matchingFallbacks += "debug"
+        }
         release {
             optimization {
                 enable = false
             }
         }
     }
+    // Device tests must never reinstall or clear the user's regular app.
+    testBuildType = "verification"
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -56,6 +63,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    "verificationImplementation"(libs.androidx.compose.ui.test.manifest)
+    "verificationImplementation"(libs.androidx.compose.ui.tooling)
 
 
 

@@ -1,7 +1,6 @@
 package com.example.gamelib.data.di
 
 import android.content.Context
-import androidx.room3.Room
 import com.example.gamelib.data.local.dao.GameDao
 import com.example.gamelib.data.local.database.GameDatabase
 import dagger.Module
@@ -20,14 +19,7 @@ object DatabaseModule {
     fun provideGameDatabase(
         @ApplicationContext context: Context
     ): GameDatabase {
-        return Room.databaseBuilder(
-            context,
-            GameDatabase::class.java,
-            "game_database"
-        )
-            .addMigrations(GameDatabase.MIGRATION_2_3)
-            .fallbackToDestructiveMigration(true)
-            .build()
+        return GameDatabase.open(context)
     }
 
     @Provides
