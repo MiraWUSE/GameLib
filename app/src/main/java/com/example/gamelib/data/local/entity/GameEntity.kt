@@ -13,5 +13,6 @@ data class GameEntity(
     val genre: String,
     val platform: String,
     val developer: String,
-    val status: String
+    val status: String,
+    val thumbnail: String? = null
 )

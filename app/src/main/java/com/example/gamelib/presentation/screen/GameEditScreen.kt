@@ -223,6 +223,7 @@ fun GameEditScreen(
                     val savedGame = Game(
                         id = game?.id ?: 0,
                         remoteId = game?.remoteId,
+                        thumbnail = game?.thumbnail,
                         title = title.trim(),
                         description = description.trim(),
                         genre = genre.trim(),

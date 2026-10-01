@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
@@ -47,7 +48,8 @@ class CatalogLibraryTest {
             // Only the network is replaced: UI, use cases, repository and Room are real.
             val api = object : FreeToGameApi {
                 override suspend fun getGames() = listOf(
-                    GameDto(452, "Catalog test game", "Short description", "RPG", "PC", "Studio")
+                    GameDto(452, "Catalog test game", "Short description", "RPG", "PC", "Studio",
+                        thumbnail = "https://example.invalid/cover.jpg")
                 )
             }
             val repository = GameRepositoryImpl(database.gameDao(), api)
@@ -81,16 +83,17 @@ class CatalogLibraryTest {
                 }
             }
             compose.waitUntil(10_000) { viewModel.uiState.value.catalogGames.isNotEmpty() }
-            compose.onNodeWithText("Добавить в библиотеку").performClick()
+            compose.onNodeWithText("Добавить в библиотеку").performScrollTo().performClick()
             compose.waitUntil(10_000) { viewModel.uiState.value.games.size == 1 }
             val saved = viewModel.uiState.value.games.single()
             assertTrue(saved.id > 0)
             assertEquals(452, saved.remoteId)
+            assertEquals("https://example.invalid/cover.jpg", saved.thumbnail)
             assertEquals(GameStatus.WANT_TO_PLAY, saved.status)
 
             compose.onNodeWithText("Мои игры").performClick()
             compose.onNodeWithText("Catalog test game").assertIsDisplayed()
-            compose.onNodeWithText("Редактировать").performClick()
+            compose.onNodeWithText("Редактировать").performScrollTo().performClick()
             compose.onNodeWithText("Статус: Хочу поиграть").performClick()
             compose.onNodeWithText("Играю").performClick()
             compose.onNodeWithText("Сохранить").performClick()

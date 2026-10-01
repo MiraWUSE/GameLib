@@ -14,7 +14,8 @@ fun GameEntity.toDomain(): Game {
         genre = genre,
         platform = platform,
         developer = developer,
-        status = GameStatus.valueOf(status)
+        status = GameStatus.valueOf(status),
+        thumbnail = thumbnail
     )
 }
 
@@ -27,7 +28,8 @@ fun Game.toEntity(): GameEntity {
         genre = genre,
         platform = platform,
         developer = developer,
-        status = status.name
+        status = status.name,
+        thumbnail = thumbnail
     )
 }
 
@@ -40,6 +42,7 @@ fun GameDto.toDomain(): Game {
         genre = genre,
         platform = platform,
         developer = developer,
-        status = GameStatus.WANT_TO_PLAY
+        status = GameStatus.WANT_TO_PLAY,
+        thumbnail = thumbnail
     )
 }

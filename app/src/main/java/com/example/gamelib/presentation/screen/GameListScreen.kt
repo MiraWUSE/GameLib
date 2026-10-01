@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.gamelib.presentation.component.GameCover
 import com.example.gamelib.domain.model.Game
 import com.example.gamelib.presentation.util.toDisplayName
 import com.example.gamelib.presentation.viewmodel.GameViewModel
@@ -86,6 +87,8 @@ private fun GameItem(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+
+            GameCover(thumbnail = game.thumbnail, title = game.title)
 
             Text(
                 text = game.title,

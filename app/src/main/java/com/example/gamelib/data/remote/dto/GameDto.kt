@@ -11,5 +11,6 @@ data class GameDto (
 
     val genre: String,
     val platform: String,
-    val developer: String
+    val developer: String,
+    val thumbnail: String? = null
 )

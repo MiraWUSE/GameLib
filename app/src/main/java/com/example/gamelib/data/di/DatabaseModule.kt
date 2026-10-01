@@ -25,6 +25,7 @@ object DatabaseModule {
             GameDatabase::class.java,
             "game_database"
         )
+            .addMigrations(GameDatabase.MIGRATION_2_3)
             .fallbackToDestructiveMigration(true)
             .build()
     }

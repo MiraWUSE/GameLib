@@ -8,7 +8,8 @@ data class Game(
     val genre: String,
     val platform: String,
     val developer: String,
-    val status: GameStatus = GameStatus.WANT_TO_PLAY
+    val status: GameStatus = GameStatus.WANT_TO_PLAY,
+    val thumbnail: String? = null
 )
 
 enum class GameStatus {
