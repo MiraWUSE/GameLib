@@ -88,7 +88,9 @@ private fun GameItem(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            GameCover(thumbnail = game.thumbnail, title = game.title)
+            if (game.remoteId != null) {
+                GameCover(thumbnail = game.thumbnail, title = game.title)
+            }
 
             Text(
                 text = game.title,
