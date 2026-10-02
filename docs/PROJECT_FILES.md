@@ -348,7 +348,6 @@ GameDto.thumbnail → GameMapper → Game.thumbnail
 | `AndroidManifest.xml` | Сообщает Android имя Application-класса, стартовую Activity, значок, тему и разрешение на интернет. Также подключает правила резервного копирования. | `GameLibApplication`, `MainActivity`, файлы из `res`. Разрешение `INTERNET` нужно запросам API и картинок. |
 | `res/values/strings.xml` | Хранит строковый ресурс `app_name` со значением GameLib. | Имя используется манифестом. Большинство текстов экранов сейчас записано прямо в Kotlin-файлах. |
 | `res/values/themes.xml` | Задаёт Android-тему `Theme.GameLib` без стандартной панели ActionBar. | Её подключает манифест. Оформление Compose-компонентов отдельно задаёт `presentation/theme/Theme.kt`. |
-| `res/values/colors.xml` | Содержит XML-ресурсы цветов из исходного шаблона. | Это отдельные ресурсы Android; основные цвета Compose сейчас определены в `Color.kt` и `Theme.kt`. |
 | `res/drawable/ic_launcher_background.xml` | Фон значка приложения. | Используется адаптивными значками `ic_launcher.xml` и `ic_launcher_round.xml`. |
 | `res/drawable/ic_launcher_foreground.xml` | Передний слой значка приложения. | Используется теми же адаптивными значками. |
 | `res/mipmap-anydpi-v26/ic_launcher.xml` | Собирает обычный адаптивный значок из фона и переднего слоя. | Манифест ссылается на `@mipmap/ic_launcher`. |
@@ -356,7 +355,6 @@ GameDto.thumbnail → GameMapper → Game.thumbnail
 | `res/mipmap-mdpi/`, `mipmap-hdpi/`, `mipmap-xhdpi/`, `mipmap-xxhdpi/`, `mipmap-xxxhdpi/`: `ic_launcher.webp` и `ic_launcher_round.webp` в каждой папке | Готовые изображения значков для разных плотностей экрана. Android выбирает подходящий ресурс. | Используются через ссылки на значки в манифесте. Это значки приложения, а не обложки игр. |
 | `res/xml/backup_rules.xml` | Файл правил Android Auto Backup для соответствующих версий Android; сейчас содержит шаблон без активных индивидуальных include/exclude. | Подключён через `android:fullBackupContent` в манифесте. |
 | `res/xml/data_extraction_rules.xml` | Файл правил резервного копирования/переноса для новых версий Android; сейчас содержит шаблон правил. | Подключён через `android:dataExtractionRules`. Не является реализованной внутри GameLib облачной синхронизацией. |
-| `keepRules/rules.keep` | Место для правил R8, сохраняющих необходимые элементы кода при оптимизации. Сейчас содержит только комментарии. | Читается Android-плагином сборки; в `app/build.gradle.kts` оптимизация release сейчас отключена. |
 
 ## Файлы сборки и служебные файлы
 
@@ -376,7 +374,7 @@ GameDto.thumbnail → GameMapper → Game.thumbnail
 | `gradle/wrapper/gradle-wrapper.properties` | Задаёт версию Gradle (сейчас 9.5.0), адрес дистрибутива, контрольную сумму и параметры загрузки. | Читается Wrapper при запуске. |
 | `local.properties` | Локальная настройка пути к Android SDK на конкретном компьютере. | Читается сборкой, исключён из Git через `.gitignore`. |
 | `.gitignore` | Перечисляет файлы и папки, которые Git не должен добавлять как новые исходники, например `local.properties` и кэш Gradle. | Используется Git, на работу Android-приложения не влияет. |
-| `TESTING.md` | Объясняет запуск проверок и отдельную проверку сохранения после остановки процесса и установки APK поверх старого. | Связан с тестовыми задачами из `app/build.gradle.kts` и `ProcessPersistenceTest.kt`. |
+| `app/.gitignore` | Исключает результаты сборки модуля `app/build/` из новых файлов Git. | Используется Git; дополняет корневой `.gitignore`. |
 | `docs/PROJECT_FILES.md` | Этот файл: объясняет назначение исходников и их связи. | Описывает проект; в APK как код приложения не выполняется. |
 
 В `app/build.gradle.kts` обычный вариант `debug` использует `com.example.gamelib`. Вариант `verification` предназначен для тестов и использует `com.example.gamelib.verification`. Это отдельные приложения с отдельными данными. `testBuildType = "verification"` направляет проверки на устройстве в тестовую копию.
@@ -389,13 +387,82 @@ KSP при сборке создаёт код для Room и Hilt. Поэтом�
 
 | Файл относительно указанной папки | Зачем нужен и что проверяет | Связи |
 | --- | --- | --- |
-| `test`: `ExampleUnitTest.kt` | Исходный пример JUnit: проверяет `2 + 2 = 4`. Логику GameLib не проверяет. | JUnit из настроек сборки. |
 | `test`: `GameThumbnailTest.kt` | Проверяет чтение ссылки из JSON и её сохранение при преобразовании моделей; отдельно проверяет отсутствие картинки. | Gson, `GameDto`, `GameMapper`, `Game`, `GameEntity`. |
 | `androidTest`: `ExampleInstrumentedTest.kt` | Проверяет, что тест работает с пакетом `com.example.gamelib.verification`. | `testBuildType` и `applicationIdSuffix` из `app/build.gradle.kts`. |
 | `androidTest`: `CatalogLibraryTest.kt` | Нажимает кнопки добавления и редактирования, проверяет сохранение игры, статуса и ссылки после закрытия/открытия базы. Ответ API заменён тестовым, остальная цепочка реальная. | Экраны, `GameViewModel`, use case, репозиторий, mapper и Room. |
 | `androidTest`: `GameCoverTest.kt` | Проверяет отображение настоящего локального тестового PNG, заглушку при отсутствии ссылки и сообщение при ошибке. | `GameCover`, Coil, Compose. Не проверяет доступность сервера FreeToGame. |
 | `androidTest`: `GameDatabaseMigrationTest.kt` | Создаёт старую базу и проверяет сохранение игры при обновлении. Проверяет версии 1 без `remoteId`, 1 с `remoteId` и 2. | `GameDatabase.open()`, обе миграции и `GameDao`. |
-| `androidTest`: `ProcessPersistenceTest.kt` | В фазе `seed` сохраняет две тестовые игры; в отдельном запуске `verify` проверяет их наличие и поля. Без аргумента фазы пропускается. | Использует `GameDatabase.open()` в тестовом приложении; порядок отдельных запусков описан в `TESTING.md`. |
+| `androidTest`: `ProcessPersistenceTest.kt` | В фазе `seed` сохраняет две тестовые игры; в отдельном запуске `verify` проверяет их наличие и поля. Без аргумента фазы пропускается. | Использует `GameDatabase.open()` в тестовом приложении. Между фазами процесс останавливают или обновляют установленную сборку; способ передачи фазы указан в комментарии самого теста. |
+
+## Где менять код для конкретной задачи
+
+Пути Kotlin-файлов ниже указаны от `app/src/main/java/com/example/gamelib/`. Это указатель по существующему коду: примеры объясняют, какие файлы понадобятся при изменении приложения, а не предлагают добавлять эти функции сейчас.
+
+### Изменить внешний вид карточки
+
+Для карточки в «Моих играх» открой `presentation/screen/GameListScreen.kt` и функцию `GameItem`. Для карточки каталога — `presentation/screen/GameCatalogScreen.kt` и `CatalogGameItem`.
+
+В этих функциях находятся подписи, отступы и кнопки. Общий вид обложки — пропорции, скругление и сообщения о загрузке — меняется в `presentation/component/GameCover.kt`. Условие, показывать ли обложку в библиотеке, находится в `GameListScreen.kt`: сейчас это `game.remoteId != null`.
+
+### Изменить поля формы или добавить новое поле игры
+
+Если нужно поменять подпись поля или проверку заполнения, достаточно начать с `presentation/screen/GameEditScreen.kt`. Например, именно здесь определяется, что название не должно быть пустым.
+
+Если нужно **новое сохраняемое поле**, изменения затрагивают несколько файлов:
+
+1. `domain/model/Game.kt` — добавить поле в объект, которым пользуется приложение.
+2. `data/local/entity/GameEntity.kt` — добавить поле в запись базы.
+3. `data/mapper/GameMapper.kt` — передавать поле между `Game` и `GameEntity` в обоих направлениях.
+4. `data/local/database/GameDatabase.kt` — поднять версию схемы, написать и зарегистрировать миграцию, чтобы старые игры сохранились.
+5. `presentation/screen/GameEditScreen.kt` — добавить ввод и передать значение при создании `savedGame`.
+6. Нужный файл карточки — показать значение, если оно должно быть видно в списке.
+
+Если поле приходит из API, понадобится также `data/remote/dto/GameDto.kt` и преобразование `GameDto.toDomain()` в `GameMapper.kt`. Связанные проверки находятся в `GameDatabaseMigrationTest.kt` и `CatalogLibraryTest.kt` в папке Android-тестов.
+
+### Изменить действие кнопки
+
+Сначала найди `onClick` нужной кнопки в файле экрана. Дальнейший путь зависит от её назначения:
+
+| Кнопка | Где находится и куда передаёт действие |
+| --- | --- |
+| «Каталог игр», «Добавить игру», «Редактировать» | `GameListScreen.kt` вызывает переданную функцию; переход на другой экран задаётся в `MainActivity.kt`. |
+| «Мои игры» | `GameCatalogScreen.kt` вызывает `onBackClick`; `MainActivity.kt` переключает экран. |
+| «Добавить в библиотеку» | `GameCatalogScreen.kt` → `GameViewModel.addGame()` → `AddGameUseCase` → репозиторий → DAO. |
+| «Сохранить» | `GameEditScreen.kt` проверяет поля и вызывает `onSaveClick`; `MainActivity.kt` выбирает добавление или обновление через ViewModel. |
+| «Удалить» | `GameListScreen.kt` → `GameViewModel.deleteGame()` → `DeleteGameUseCase` → репозиторий → DAO. |
+| «Повторить» | `GameCatalogScreen.kt` → `GameViewModel.loadCatalogGames()`. |
+
+Для изменения надписи достаточно файла экрана. Для изменения операции с данными нужно проследить вызов до ViewModel, use case и репозитория.
+
+### Изменить статусы игры
+
+Названия на русском меняются в `presentation/util/GameStatusExtensions.kt`. Сам набор вариантов находится в перечислении `GameStatus` в `domain/model/Game.kt`. Форма в `GameEditScreen.kt` строит меню по `GameStatus.entries`.
+
+В базе хранится программное имя статуса, например `PLAYING`. Изменение русского текста не меняет сохранённые данные. Переименование или удаление самого `PLAYING` требует также обработки старых записей: `GameMapper.kt` читает их через `GameStatus.valueOf(status)`.
+
+### Изменить запрос к API или количество игр
+
+Базовый адрес сервера находится в `data/di/NetworkModule.kt`. Путь запроса `games` и метод запроса находятся в `data/remote/api/FreeToGameApi.kt`. Поля ответа описаны в `data/remote/dto/GameDto.kt`.
+
+Ограничение до 50 игр задано вызовом `.take(50)` в `data/repository/GameRepositoryImpl.kt`. Это ограничение уже полученного списка, а не параметр запроса к серверу. Преобразование ответа для экранов находится в `data/mapper/GameMapper.kt`.
+
+### Изменить оформление всего приложения
+
+Цвета определяются в `presentation/theme/Color.kt`, а выбор цветовой схемы — в `Theme.kt`. На Android 12+ включены динамические системные цвета, поэтому изменение только `Color.kt` может не изменить вид на таком устройстве. За это отвечает параметр `dynamicColor` в `GameLibTheme`.
+
+Общие параметры текста находятся в `presentation/theme/Type.kt`. Размер или стиль конкретной подписи можно выбрать непосредственно в файле соответствующего экрана через `MaterialTheme.typography`.
+
+### Найти код сохранения, если игра пропадает
+
+Путь записи начинается в `GameViewModel.addGame()` или `updateGame()`, идёт через соответствующий use case и `GameRepositoryImpl`, затем через `GameMapper` в `GameDao`. Базу открывает `GameDatabase.open()`, а для приложения её предоставляет `DatabaseModule`.
+
+Путь обратного чтения: `GameDao.getAllGames()` → репозиторий → `GetGamesUseCase` → `GameViewModel.observeGames()` → `GameUiState.games` → `GameListScreen`.
+
+Настройки версии и миграций нужно искать в `GameDatabase.kt`. Отличие обычного приложения от тестовой копии — в `app/build.gradle.kts`. Проверки сохранения находятся в `CatalogLibraryTest.kt`, `GameDatabaseMigrationTest.kt` и `ProcessPersistenceTest.kt`.
+
+### Изменить сообщение после сохранения
+
+Текст «Данные сохранены» находится в `MainActivity.kt`, внутри обработки `GameUiEvent.DataSaved`. Само событие объявлено в `presentation/state/GameUiEvent.kt` и отправляется из `GameViewModel.kt` после выполнения добавления или обновления.
 
 ## Настройки Android Studio — `.idea`
 
