@@ -39,7 +39,8 @@ import java.util.UUID
 fun GameEditScreen(
     viewModel: GameViewModel,
     game: Game? = null,
-    onSaveClick: (Game) -> Unit
+    onSaveClick: (Game) -> Unit,
+    onCancelClick: () -> Unit
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -278,6 +279,14 @@ fun GameEditScreen(
         }
 
         Button(
+            onClick = onCancelClick,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !uiState.isImageUploading
+        ) {
+            Text("Отмена")
+        }
+
+        Button(
             onClick = {
 
                 showErrors = true
@@ -295,8 +304,6 @@ fun GameEditScreen(
 
                     if (imageUri == null) {
 
-                        // Новую картинку не выбирали.
-                        // Оставляем старый URL.
                         onSaveClick(
                             createGame(game?.thumbnail)
                         )

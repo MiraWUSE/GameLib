@@ -96,6 +96,7 @@ class MainActivity : ComponentActivity() {
                                 GameEditScreen(
                                     viewModel = viewModel,
                                     game = selectedGame,
+
                                     onSaveClick = { game ->
 
                                         if (selectedGame == null) {
@@ -104,6 +105,11 @@ class MainActivity : ComponentActivity() {
                                             viewModel.updateGame(game)
                                         }
 
+                                        showEditScreen = false
+                                        selectedGame = null
+                                    },
+
+                                    onCancelClick = {
                                         showEditScreen = false
                                         selectedGame = null
                                     }

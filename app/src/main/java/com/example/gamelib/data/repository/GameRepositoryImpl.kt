@@ -25,7 +25,7 @@ class GameRepositoryImpl @Inject constructor(
     override suspend fun getCatalogGames(): List<Game> {
         return freeToGameApi
             .getGames()
-            .take(50)
+            .take(200)
             .map { it.toDomain() }
     }
 
