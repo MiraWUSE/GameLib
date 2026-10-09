@@ -9,5 +9,9 @@ data class GameUiState(
 
     val isCatalogLoading: Boolean = false,
 
-    val catalogErrorMessage: String? = null
+    val catalogErrorMessage: String? = null,
+
+    val isImageUploading: Boolean = false,
+
+    val imageUploadErrorMessage: String? = null
 )

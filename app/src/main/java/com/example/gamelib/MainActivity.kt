@@ -94,6 +94,7 @@ class MainActivity : ComponentActivity() {
                             showEditScreen -> {
 
                                 GameEditScreen(
+                                    viewModel = viewModel,
                                     game = selectedGame,
                                     onSaveClick = { game ->
 

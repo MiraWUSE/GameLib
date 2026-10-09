@@ -12,6 +12,7 @@ import com.example.gamelib.presentation.state.GameUiEvent
 import com.example.gamelib.presentation.state.GameUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import com.example.gamelib.domain.usecase.UploadGameImageUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +27,8 @@ class GameViewModel @Inject constructor(
     private val getCatalogGamesUseCase: GetCatalogGamesUseCase,
     private val addGameUseCase: AddGameUseCase,
     private val updateGameUseCase: UpdateGameUseCase,
-    private val deleteGameUseCase: DeleteGameUseCase
+    private val deleteGameUseCase: DeleteGameUseCase,
+    private val uploadGameImageUseCase: UploadGameImageUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GameUiState())
@@ -82,6 +84,50 @@ class GameViewModel @Inject constructor(
                     isCatalogLoading = false,
                     catalogErrorMessage =
                         "${exception.javaClass.simpleName}: ${exception.message}"
+                )
+            }
+        }
+    }
+
+    fun uploadGameImage(
+        bytes: ByteArray,
+        fileName: String,
+        contentType: String,
+        onSuccess: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+
+            _uiState.value = _uiState.value.copy(
+                isImageUploading = true,
+                imageUploadErrorMessage = null
+            )
+
+            try {
+
+                val imageUrl = uploadGameImageUseCase(
+                    bytes = bytes,
+                    fileName = fileName,
+                    contentType = contentType
+                )
+
+                _uiState.value = _uiState.value.copy(
+                    isImageUploading = false
+                )
+
+                onSuccess(imageUrl)
+
+            } catch (exception: Exception) {
+
+                Log.e(
+                    "ImageUpload",
+                    "Ошибка загрузки изображения",
+                    exception
+                )
+
+                _uiState.value = _uiState.value.copy(
+                    isImageUploading = false,
+                    imageUploadErrorMessage =
+                        "Не удалось загрузить изображение"
                 )
             }
         }

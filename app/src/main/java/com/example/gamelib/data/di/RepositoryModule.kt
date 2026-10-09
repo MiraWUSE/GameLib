@@ -1,7 +1,9 @@
 package com.example.gamelib.data.di
 
 import com.example.gamelib.data.repository.GameRepositoryImpl
+import com.example.gamelib.data.repository.ImageStorageRepositoryImpl
 import com.example.gamelib.domain.repository.GameRepository
+import com.example.gamelib.domain.repository.ImageStorageRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,4 +19,10 @@ abstract class RepositoryModule {
     abstract fun bindGameRepository(
         gameRepositoryImpl: GameRepositoryImpl
     ): GameRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindImageStorageRepository(
+        imageStorageRepositoryImpl: ImageStorageRepositoryImpl
+    ): ImageStorageRepository
 }

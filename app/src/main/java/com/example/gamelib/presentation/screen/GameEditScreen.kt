@@ -1,32 +1,49 @@
 package com.example.gamelib.presentation.screen
 
+import android.net.Uri
+import android.webkit.MimeTypeMap
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.gamelib.domain.model.Game
 import com.example.gamelib.domain.model.GameStatus
+import com.example.gamelib.presentation.component.GameCover
 import com.example.gamelib.presentation.util.toDisplayName
+import com.example.gamelib.presentation.viewmodel.GameViewModel
+import java.util.UUID
 
 @Composable
 fun GameEditScreen(
+    viewModel: GameViewModel,
     game: Game? = null,
     onSaveClick: (Game) -> Unit
 ) {
+    val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
+
     var title by remember(game) {
         mutableStateOf(game?.title ?: "")
     }
@@ -61,15 +78,40 @@ fun GameEditScreen(
         mutableStateOf(false)
     }
 
+    var selectedImageUri by remember(game) {
+        mutableStateOf<Uri?>(null)
+    }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        selectedImageUri = uri
+    }
+
     val titleError = showErrors && title.isBlank()
     val descriptionError = showErrors && description.isBlank()
     val genreError = showErrors && genre.isBlank()
     val platformError = showErrors && platform.isBlank()
     val developerError = showErrors && developer.isBlank()
 
+    fun createGame(thumbnailUrl: String?): Game {
+        return Game(
+            id = game?.id ?: 0,
+            remoteId = game?.remoteId,
+            thumbnail = thumbnailUrl,
+            title = title.trim(),
+            description = description.trim(),
+            genre = genre.trim(),
+            platform = platform.trim(),
+            developer = developer.trim(),
+            status = status
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -81,6 +123,25 @@ fun GameEditScreen(
                 "Редактирование игры"
             }
         )
+
+        GameCover(
+            thumbnail = selectedImageUri?.toString() ?: game?.thumbnail,
+            title = title.ifBlank { "Игра" }
+        )
+
+        Button(
+            onClick = {
+                imagePickerLauncher.launch(
+                    PickVisualMediaRequest(
+                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                    )
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !uiState.isImageUploading
+        ) {
+            Text("Выбрать изображение")
+        }
 
         OutlinedTextField(
             value = title,
@@ -193,9 +254,7 @@ fun GameEditScreen(
 
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                gameStatus.toDisplayName()
-                            )
+                            Text(gameStatus.toDisplayName())
                         },
                         onClick = {
                             status = gameStatus
@@ -204,6 +263,18 @@ fun GameEditScreen(
                     )
                 }
             }
+        }
+
+        if (uiState.isImageUploading) {
+            CircularProgressIndicator()
+
+            Text("Загрузка изображения...")
+        }
+
+        if (uiState.imageUploadErrorMessage != null) {
+            Text(
+                text = uiState.imageUploadErrorMessage ?: ""
+            )
         }
 
         Button(
@@ -220,24 +291,67 @@ fun GameEditScreen(
 
                 if (isValid) {
 
-                    val savedGame = Game(
-                        id = game?.id ?: 0,
-                        remoteId = game?.remoteId,
-                        thumbnail = game?.thumbnail,
-                        title = title.trim(),
-                        description = description.trim(),
-                        genre = genre.trim(),
-                        platform = platform.trim(),
-                        developer = developer.trim(),
-                        status = status
-                    )
+                    val imageUri = selectedImageUri
 
-                    onSaveClick(savedGame)
+                    if (imageUri == null) {
+
+                        // Новую картинку не выбирали.
+                        // Оставляем старый URL.
+                        onSaveClick(
+                            createGame(game?.thumbnail)
+                        )
+
+                    } else {
+
+                        val contentResolver = context.contentResolver
+
+                        val bytes = contentResolver
+                            .openInputStream(imageUri)
+                            ?.use { inputStream ->
+                                inputStream.readBytes()
+                            }
+
+                        if (bytes != null) {
+
+                            val contentType =
+                                contentResolver.getType(imageUri)
+                                    ?: "image/jpeg"
+
+                            val extension =
+                                MimeTypeMap
+                                    .getSingleton()
+                                    .getExtensionFromMimeType(contentType)
+                                    ?: "jpg"
+
+                            val fileName =
+                                "${UUID.randomUUID()}.$extension"
+
+                            viewModel.uploadGameImage(
+                                bytes = bytes,
+                                fileName = fileName,
+                                contentType = contentType,
+                                onSuccess = { imageUrl ->
+
+                                    onSaveClick(
+                                        createGame(imageUrl)
+                                    )
+                                }
+                            )
+                        }
+                    }
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !uiState.isImageUploading
         ) {
-            Text("Сохранить")
+
+            Text(
+                if (uiState.isImageUploading) {
+                    "Загрузка..."
+                } else {
+                    "Сохранить"
+                }
+            )
         }
     }
 }
