@@ -1,7 +1,9 @@
-package com.example.gamelib
+package com.example.gamelib.presentation.component
 
 import android.graphics.Bitmap
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -36,6 +38,11 @@ class GameCoverTest {
             org.junit.Assert.assertTrue(
                 compose.onAllNodesWithText("Не удалось загрузить обложку").fetchSemanticsNodes().isEmpty()
             )
+            val pixels = compose.onNodeWithContentDescription("Обложка игры Test")
+                .captureToImage().toPixelMap()
+            val center = pixels[pixels.width / 2, pixels.height / 2]
+            org.junit.Assert.assertTrue("The decoded blue image must actually be drawn",
+                center.blue > 0.9f && center.red < 0.1f && center.green < 0.1f)
         } finally {
             file.delete()
         }

@@ -1,3 +1,4 @@
+
 package com.example.gamelib.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
@@ -17,11 +18,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.gamelib.presentation.component.GameCover
 import com.example.gamelib.domain.model.Game
+import com.example.gamelib.presentation.component.GameCover
+import com.example.gamelib.presentation.state.GameUiState
 import com.example.gamelib.presentation.util.toDisplayName
 import com.example.gamelib.presentation.viewmodel.GameViewModel
 
+// Получает данные из ViewModel
 @Composable
 fun GameListScreen(
     viewModel: GameViewModel,
@@ -29,7 +32,29 @@ fun GameListScreen(
     onEditClick: (Game) -> Unit,
     onCatalogClick: () -> Unit
 ) {
+
     val uiState by viewModel.uiState.collectAsState()
+
+    GameListContent(
+        uiState = uiState,
+        onAddClick = onAddClick,
+        onEditClick = onEditClick,
+        onDeleteClick = { game ->
+            viewModel.deleteGame(game)
+        },
+        onCatalogClick = onCatalogClick
+    )
+}
+
+// Полноценный экран библиотеки игр
+@Composable
+fun GameListContent(
+    uiState: GameUiState,
+    onAddClick: () -> Unit,
+    onEditClick: (Game) -> Unit,
+    onDeleteClick: (Game) -> Unit,
+    onCatalogClick: () -> Unit
+) {
 
     Column(
         modifier = Modifier
@@ -59,13 +84,14 @@ fun GameListScreen(
                 .padding(top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
             items(uiState.games) { game ->
 
                 GameItem(
                     game = game,
                     onEditClick = onEditClick,
                     onDeleteClick = {
-                        viewModel.deleteGame(game)
+                        onDeleteClick(game)
                     }
                 )
             }
@@ -73,12 +99,14 @@ fun GameListScreen(
     }
 }
 
+// Карточка отдельной игры
 @Composable
 private fun GameItem(
     game: Game,
     onEditClick: (Game) -> Unit,
     onDeleteClick: () -> Unit
 ) {
+
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {

@@ -27,6 +27,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // This package requires two separate instrumentation processes, not one test run.
+        testInstrumentationRunnerArguments["notPackage"] = "com.example.gamelib.manual"
 
         buildConfigField(
             "String",
@@ -109,7 +111,6 @@ dependencies {
     // Tests
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.turbine)
     testImplementation(libs.mockk)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -122,4 +123,14 @@ dependencies {
 
     "verificationImplementation"(libs.androidx.compose.ui.test.manifest)
     "verificationImplementation"(libs.androidx.compose.ui.tooling)
+}
+
+tasks.register("verifyAllTests") {
+    group = "verification"
+    description = "Run JVM, Compose UI and Room tests in the isolated verification app. Requires an Android device."
+    dependsOn("testVerificationUnitTest", "assembleVerificationAndroidTest", "connectedVerificationAndroidTest")
+}
+
+tasks.matching { it.name == "connectedVerificationAndroidTest" }.configureEach {
+    mustRunAfter("testVerificationUnitTest")
 }

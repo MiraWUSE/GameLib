@@ -1,7 +1,10 @@
 
 package com.example.gamelib.presentation.viewmodel
 
-import com.example.gamelib.MainDispatcherRule
+import com.example.gamelib.support.MainDispatcherRule
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.cancel
+import org.junit.After
 import com.example.gamelib.domain.model.Game
 import com.example.gamelib.domain.repository.GameRepository
 import com.example.gamelib.domain.repository.ImageStorageRepository
@@ -27,7 +30,6 @@ import android.util.Log
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -35,6 +37,13 @@ class GameViewModelTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
+
+    private val viewModels = mutableListOf<GameViewModel>()
+
+    @After
+    fun clearViewModels() {
+        viewModels.forEach { it.viewModelScope.cancel() }
+    }
 
     private fun createGame(
         id: Int = 0,
@@ -74,7 +83,7 @@ class GameViewModelTest {
             uploadGameImageUseCase = UploadGameImageUseCase(
                 imageRepository
             )
-        )
+        ).also { viewModels.add(it) }
     }
 
     @Test
@@ -262,7 +271,7 @@ class GameViewModelTest {
 
             assertFalse(state.isCatalogLoading)
 
-            assertNotNull(state.catalogErrorMessage)
+            assertEquals("Exception: Ошибка загрузки каталога", state.catalogErrorMessage)
 
             assertTrue(state.catalogGames.isEmpty())
 

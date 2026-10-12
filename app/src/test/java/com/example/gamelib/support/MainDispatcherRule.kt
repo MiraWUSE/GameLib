@@ -1,4 +1,4 @@
-package com.example.gamelib
+package com.example.gamelib.support
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

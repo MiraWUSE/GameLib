@@ -51,7 +51,7 @@ class FilterCatalogGamesUseCaseTest {
 
         val result = filter()
 
-        assertEquals(4, result.size)
+        assertEquals(games, result)
     }
 
     @Test
@@ -93,10 +93,17 @@ class FilterCatalogGamesUseCaseTest {
     @Test
     fun `все фильтры работают одновременно`() {
 
-        val result = filter(
-            query = "counter",
-            genre = "Shooter",
-            platform = "PC"
+        // Each distractor violates only one condition. Ignoring any filter must fail.
+        val candidates = games + listOf(
+            createGame(5, "Counter Strategy", "Strategy", "PC"),
+            createGame(6, "Counter Browser", "Shooter", "Browser"),
+            createGame(7, "Other shooter", "Shooter", "PC")
+        )
+        val result = useCase(
+            games = candidates,
+            searchQuery = "counter",
+            selectedGenre = "Shooter",
+            selectedPlatform = "PC"
         )
 
         assertEquals(

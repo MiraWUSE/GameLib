@@ -1,4 +1,4 @@
-package com.example.gamelib
+package com.example.gamelib.data.mapper
 
 import com.example.gamelib.data.mapper.toDomain
 import com.example.gamelib.data.mapper.toEntity
@@ -15,6 +15,7 @@ class GameThumbnailTest {
             "genre":"RPG","platform":"PC","developer":"Studio",
             "thumbnail":"https://www.freetogame.com/g/452/thumbnail.jpg"
         }""", GameDto::class.java)
+        assertEquals("https://www.freetogame.com/g/452/thumbnail.jpg", dto.thumbnail)
         val restored = dto.toDomain().toEntity().toDomain()
         assertEquals(dto.thumbnail, restored.thumbnail)
         assertEquals(452, restored.remoteId)
