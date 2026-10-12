@@ -1,4 +1,4 @@
-package com.example.gamelib
+package com.example.gamelib.data.local
 
 import android.database.sqlite.SQLiteDatabase
 import androidx.test.ext.junit.runners.AndroidJUnit4
