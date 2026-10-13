@@ -23,7 +23,6 @@ class GameListScreenTest {
     @get:Rule
     val compose = createComposeRule()
 
-    // Тестовая игра
     private val testGame = Game(
         id = 1,
         title = "Dota 2",
@@ -35,7 +34,6 @@ class GameListScreenTest {
         thumbnail = null
     )
 
-    // Запуск тестируемой страницы
     private fun showScreen(
         games: List<Game> = emptyList(),
         onAddClick: () -> Unit = {},
@@ -64,14 +62,12 @@ class GameListScreenTest {
 
         showScreen()
 
-        // Основные кнопки должны присутствовать
         compose.onNodeWithText("Каталог игр")
             .assertIsDisplayed()
 
         compose.onNodeWithText("Добавить игру")
             .assertIsDisplayed()
 
-        // Карточки игры быть не должно
         compose.onNodeWithText("Dota 2")
             .assertDoesNotExist()
         compose.onNodeWithText("Редактировать").assertDoesNotExist()
@@ -83,32 +79,26 @@ class GameListScreenTest {
 
         showScreen(games = listOf(testGame))
 
-        // Проверяем название
         compose.onNodeWithText("Dota 2")
             .performScrollTo()
             .assertIsDisplayed()
 
-        // Проверяем жанр
         compose.onNodeWithText("Жанр: MOBA")
             .performScrollTo()
             .assertIsDisplayed()
 
-        // Проверяем платформу
         compose.onNodeWithText("Платформа: PC")
             .performScrollTo()
             .assertIsDisplayed()
 
-        // Проверяем разработчика
         compose.onNodeWithText("Разработчик: Valve")
             .performScrollTo()
             .assertIsDisplayed()
 
-        // Проверяем статус
         compose.onNodeWithText("Статус: Хочу поиграть")
             .performScrollTo()
             .assertIsDisplayed()
 
-        // Проверяем наличие кнопок карточки
         compose.onNodeWithText("Редактировать")
             .performScrollTo()
             .assertIsDisplayed()
