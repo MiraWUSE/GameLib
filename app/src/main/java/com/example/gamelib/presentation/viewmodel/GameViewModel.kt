@@ -42,7 +42,6 @@ class GameViewModel @Inject constructor(
 
     val events = _events.receiveAsFlow()
 
-    // UseCase для поиска и фильтрации каталога
     private val filterCatalogGamesUseCase =
         FilterCatalogGamesUseCase()
 
@@ -50,7 +49,6 @@ class GameViewModel @Inject constructor(
         observeGames()
     }
 
-    // Получение локальных игр из Room
     private fun observeGames() {
 
         viewModelScope.launch {
@@ -64,7 +62,6 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    // Загрузка каталога через FreeToGame API
     fun loadCatalogGames() {
 
         viewModelScope.launch {
@@ -100,7 +97,6 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    // Поиск и фильтрация загруженного каталога
     fun filterCatalogGames(
         searchQuery: String,
         selectedGenre: String,
@@ -115,7 +111,6 @@ class GameViewModel @Inject constructor(
         )
     }
 
-    // Загрузка изображения в Supabase Storage
     fun uploadGameImage(
         bytes: ByteArray,
         fileName: String,
@@ -161,7 +156,6 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    // Добавление новой игры
     fun addGame(game: Game) {
 
         viewModelScope.launch {
@@ -174,7 +168,6 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    // Редактирование игры
     fun updateGame(game: Game) {
 
         viewModelScope.launch {
@@ -187,7 +180,6 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    // Удаление игры
     fun deleteGame(game: Game) {
 
         viewModelScope.launch {
