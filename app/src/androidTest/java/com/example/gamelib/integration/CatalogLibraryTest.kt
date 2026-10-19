@@ -62,7 +62,6 @@ class CatalogLibraryTest {
 
         try {
 
-            // Подменяем FreeToGame API тестовыми данными
             val api = object : FreeToGameApi {
 
                 override suspend fun getGames(): List<GameDto> {
@@ -80,13 +79,11 @@ class CatalogLibraryTest {
                 }
             }
 
-            // Репозиторий использует настоящую тестовую Room
             val repository = GameRepositoryImpl(
                 gameDao = database.gameDao(),
                 freeToGameApi = api
             )
 
-            // Подменяем Supabase тестовым репозиторием
             val imageRepository = object : ImageStorageRepository {
 
                 override suspend fun uploadImage(
@@ -100,7 +97,6 @@ class CatalogLibraryTest {
 
             lateinit var viewModel: GameViewModel
 
-            // Создаём ViewModel со всеми шестью UseCase
             compose.runOnUiThread {
 
                 val factory = object : ViewModelProvider.Factory {
@@ -129,7 +125,6 @@ class CatalogLibraryTest {
                 )[GameViewModel::class.java]
             }
 
-            // Переключение между экранами
             var screen by mutableStateOf("catalog")
 
             var selectedGame by mutableStateOf<Game?>(null)
@@ -183,12 +178,10 @@ class CatalogLibraryTest {
                 }
             }
 
-            // 1. Ожидаем загрузку каталога
             compose.waitUntil(10_000) {
                 viewModel.uiState.value.catalogGames.isNotEmpty()
             }
 
-            // 2. Добавляем игру из каталога
             compose.onNodeWithText("Добавить в библиотеку")
                 .performScrollTo()
                 .performClick()
@@ -197,7 +190,6 @@ class CatalogLibraryTest {
                 viewModel.uiState.value.games.size == 1
             }
 
-            // 3. Проверяем сохранённую игру
             val saved = viewModel.uiState.value.games.single()
 
             assertTrue(saved.id > 0)
@@ -217,7 +209,6 @@ class CatalogLibraryTest {
                 saved.status
             )
 
-            // 4. Переходим в раздел "Мои игры"
             compose.onNodeWithText("Мои игры")
                 .performClick()
 
@@ -225,12 +216,10 @@ class CatalogLibraryTest {
                 .performScrollTo()
                 .assertIsDisplayed()
 
-            // 5. Открываем редактирование
             compose.onNodeWithText("Редактировать")
                 .performScrollTo()
                 .performClick()
 
-            // 6. Меняем статус игры
             compose.onNodeWithText("Статус: Хочу поиграть")
                 .performScrollTo()
                 .performClick()
@@ -238,7 +227,6 @@ class CatalogLibraryTest {
             compose.onNodeWithText("Играю")
                 .performClick()
 
-            // 7. Сохраняем изменения
             compose.onNodeWithText("Сохранить")
                 .performScrollTo()
                 .performClick()
@@ -248,20 +236,17 @@ class CatalogLibraryTest {
                     GameStatus.PLAYING
             }
 
-            // 8. Закрываем ViewModel и базу
             compose.runOnUiThread {
                 store.clear()
             }
 
             database.close()
 
-            // 9. Повторно открываем базу
             database = GameDatabase.open(
                 context,
                 databaseName
             )
 
-            // 10. Проверяем, сохранились ли изменения
             val persisted = runBlocking {
 
                 GameRepositoryImpl(
@@ -277,7 +262,6 @@ class CatalogLibraryTest {
 
         } finally {
 
-            // Очищаем ресурсы после теста
             compose.runOnUiThread {
                 store.clear()
             }

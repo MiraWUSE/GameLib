@@ -24,7 +24,6 @@ import com.example.gamelib.presentation.state.GameUiState
 import com.example.gamelib.presentation.util.toDisplayName
 import com.example.gamelib.presentation.viewmodel.GameViewModel
 
-// Получает данные из ViewModel
 @Composable
 fun GameListScreen(
     viewModel: GameViewModel,
@@ -46,7 +45,6 @@ fun GameListScreen(
     )
 }
 
-// Полноценный экран библиотеки игр
 @Composable
 fun GameListContent(
     uiState: GameUiState,
@@ -99,7 +97,6 @@ fun GameListContent(
     }
 }
 
-// Карточка отдельной игры
 @Composable
 private fun GameItem(
     game: Game,

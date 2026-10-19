@@ -26,7 +26,6 @@ abstract class GameDatabase : RoomDatabase() {
 
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override suspend fun migrate(connection: SQLiteConnection) {
-                // Some early builds already added remoteId without changing version 1.
                 val hasRemoteId = connection.prepare("PRAGMA table_info(games)").use { columns ->
                     var found = false
                     while (columns.step()) {

@@ -39,22 +39,18 @@ fun GameCatalogScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    // Поисковая строка
     var searchQuery by remember {
         mutableStateOf("")
     }
 
-    // Выбранный жанр
     var selectedGenre by remember {
         mutableStateOf("Все")
     }
 
-    // Выбранная платформа
     var selectedPlatform by remember {
         mutableStateOf("Все")
     }
 
-    // Состояния выпадающих меню
     var genreMenuExpanded by remember {
         mutableStateOf(false)
     }
@@ -63,7 +59,6 @@ fun GameCatalogScreen(
         mutableStateOf(false)
     }
 
-    // Загружаем каталог при открытии экрана
     LaunchedEffect(Unit) {
 
         if (uiState.catalogGames.isEmpty()) {
@@ -71,7 +66,6 @@ fun GameCatalogScreen(
         }
     }
 
-    // Собираем список доступных жанров
     val genres = remember(uiState.catalogGames) {
 
         listOf("Все") +
@@ -81,7 +75,6 @@ fun GameCatalogScreen(
                     .sorted()
     }
 
-    // Собираем список доступных платформ
     val platforms = remember(uiState.catalogGames) {
 
         listOf("Все") +
@@ -91,7 +84,6 @@ fun GameCatalogScreen(
                     .sorted()
     }
 
-    // Получаем результат фильтрации через ViewModel
     val filteredGames = viewModel.filterCatalogGames(
         searchQuery = searchQuery,
         selectedGenre = selectedGenre,
@@ -104,7 +96,6 @@ fun GameCatalogScreen(
             .padding(16.dp)
     ) {
 
-        // Кнопка возвращения в библиотеку
         Button(
             onClick = onBackClick,
             modifier = Modifier.fillMaxWidth()
@@ -114,7 +105,6 @@ fun GameCatalogScreen(
 
         when {
 
-            // Состояние загрузки каталога
             uiState.isCatalogLoading -> {
 
                 CircularProgressIndicator(
@@ -122,7 +112,6 @@ fun GameCatalogScreen(
                 )
             }
 
-            // Ошибка загрузки каталога
             uiState.catalogErrorMessage != null -> {
 
                 Text(
@@ -139,10 +128,8 @@ fun GameCatalogScreen(
                 }
             }
 
-            // Каталог успешно загружен
             else -> {
 
-                // Динамический поиск по названию
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = {
@@ -160,7 +147,6 @@ fun GameCatalogScreen(
                         .padding(top = 12.dp)
                 )
 
-                // Фильтры жанра и платформы
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -168,7 +154,6 @@ fun GameCatalogScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
 
-                    // Фильтр по жанру
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
@@ -204,7 +189,6 @@ fun GameCatalogScreen(
                         }
                     }
 
-                    // Фильтр по платформе
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
@@ -241,14 +225,12 @@ fun GameCatalogScreen(
                     }
                 }
 
-                // Количество игр после фильтрации
                 Text(
                     text = "Найдено игр: ${filteredGames.size}",
                     modifier = Modifier.padding(top = 12.dp),
                     style = MaterialTheme.typography.bodyMedium
                 )
 
-                // Результаты поиска
                 if (filteredGames.isEmpty()) {
 
                     Text(
@@ -282,7 +264,6 @@ fun GameCatalogScreen(
     }
 }
 
-// Карточка игры из каталога
 @Composable
 private fun CatalogGameItem(
     game: Game,
